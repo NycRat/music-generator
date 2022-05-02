@@ -1,0 +1,11 @@
+SFML/
+
+x64/
+x86/
+[Dd]ebug
+[Rr]elease
+
+.vs/
+*.obj
+*.user
+
