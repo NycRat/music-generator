@@ -1,35 +1,64 @@
 #include "App.h"
 
-App::App()
+namespace App
 {
-  this->create({1280, 720}, "Music Generator v0.0", sf::Style::Close | sf::Style::Titlebar);
-  this->setFramerateLimit(240);
-}
-
-void App::start()
-{
-  sf::Event event;
-  while (this->isOpen())
+  namespace
   {
-    while (this->pollEvent(event))
+    static sf::RenderWindow& getWindow()
     {
-      if (event.type == sf::Event::Closed)
+      static sf::RenderWindow we;
+      return we;
+    }
+    static void handleEvents()
+    {
+      static sf::Event event;
+      sf::RenderWindow& window = getWindow();
+      while (window.pollEvent(event))
       {
-        this->close();
+        if (event.type == sf::Event::Closed)
+        {
+          window.close();
+        }
+        if (event.type == sf::Event::KeyPressed)
+        {
+          if (event.key.code == sf::Keyboard::Escape)
+          {
+            window.close();
+          }
+        }
       }
     }
+    static void render()
+    {
+      getWindow().clear();
+      getWindow().display();
+    }
 
-    this->update();
-    this->render();
+    static void update()
+    {
+    }
+
+    static sf::Sound getSound()
+    {
+    }
   }
-}
 
-void App::render()
-{
-  this->clear();
-  this->display();
-}
+  void start()
+  {
+    sf::RenderWindow& window = getWindow();
+    window.create({1280, 720}, "Music Generator v0.0", sf::Style::Close | sf::Style::Titlebar);
+    window.setFramerateLimit(240);
 
-void App::update()
-{
+    sf::SoundBuffer soundBuffer = AudioGenerator::get({2, 220, 1}, AudioGenerator::square);
+    sf::Sound sound(soundBuffer);
+    sound.setVolume(40);
+    sound.play();
+
+    while (window.isOpen())
+    {
+      handleEvents();
+      update();
+      render();
+    }
+  }
 }

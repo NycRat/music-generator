@@ -1,14 +1,9 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include "AudioGenerator.h"
 
-class App: public sf::RenderWindow
+namespace App
 {
-public:
-  App();
-
-  void start();
-private:
-  void render();
-  void update();
+  extern void start();
 };
