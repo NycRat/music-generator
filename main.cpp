@@ -2,6 +2,7 @@
 
 int main(int argc, char** argv)
 {
-  App::start();
+  App myApp;
+  myApp.start();
   return EXIT_SUCCESS;
 }

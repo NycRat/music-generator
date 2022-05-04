@@ -1,64 +1,82 @@
 #include "App.h"
 
-namespace App
+static const uint32_t WINDOW_HEIGHT = 720;
+static const uint32_t WINDOW_WIDTH = 1280;
+
+bool isInside(const sf::Vector2i& mousePos, const Button& button)
 {
-  namespace
+  const sf::Vector2f& buttonPos = button.getPosition();
+  const sf::Vector2f& buttonSize = button.getSize();
+  if (mousePos.x >= buttonPos.x && mousePos.y >= buttonPos.y &&
+    mousePos.x <= buttonPos.x + buttonSize.x && mousePos.y <= buttonPos.y + buttonSize.y)
   {
-    static sf::RenderWindow& getWindow()
+    return true;
+  }
+  return false;
+}
+
+void App::handleButtonClicks(const sf::Vector2i& mousePos)
+{
+  if (isInside(mousePos, m_playButton))
+  {
+    m_musicBuffer = AudioGenerator::generateMusic(m_soundBuffers);
+    m_music.setBuffer(m_musicBuffer);
+    m_music.play();
+  }
+}
+
+void App::handleEvents()
+{
+  sf::Event event;
+  while (this->pollEvent(event))
+  {
+    if (event.type == sf::Event::Closed)
     {
-      static sf::RenderWindow we;
-      return we;
+      this->close();
     }
-    static void handleEvents()
+    if (event.type == sf::Event::KeyPressed)
     {
-      static sf::Event event;
-      sf::RenderWindow& window = getWindow();
-      while (window.pollEvent(event))
+      if (event.key.code == sf::Keyboard::Escape)
       {
-        if (event.type == sf::Event::Closed)
-        {
-          window.close();
-        }
-        if (event.type == sf::Event::KeyPressed)
-        {
-          if (event.key.code == sf::Keyboard::Escape)
-          {
-            window.close();
-          }
-        }
+        this->close();
       }
     }
-    static void render()
+    if (event.type == sf::Event::MouseButtonPressed)
     {
-      getWindow().clear();
-      getWindow().display();
-    }
-
-    static void update()
-    {
-    }
-
-    static sf::Sound getSound()
-    {
+      this->handleButtonClicks(sf::Mouse::getPosition(*this));
     }
   }
+}
 
-  void start()
+void App::render()
+{
+  this->clear();
+  this->draw(m_playButton);
+  this->display();
+}
+
+void App::update()
+{
+}
+
+void App::start()
+{
+  this->create({WINDOW_WIDTH, WINDOW_HEIGHT}, "Music Generator v0.0", sf::Style::Close | sf::Style::Titlebar);
+  this->setVerticalSyncEnabled(true);
+
+  m_soundBuffers.push_back(AudioGenerator::get({2, AudioGenerator::E, 0.4f}, AudioGenerator::random));
+  m_soundBuffers.push_back(AudioGenerator::get({2, AudioGenerator::A / 2, 0.4f}, AudioGenerator::square));
+  m_soundBuffers.push_back(AudioGenerator::get({2, AudioGenerator::G, 0.4f}, AudioGenerator::sawtooth));
+  m_soundBuffers.push_back(AudioGenerator::get({2, AudioGenerator::C / 2, 0.8f}, AudioGenerator::sine));
+
+  m_playButton.setSize({400, 150});
+  m_playButton.setPosition({WINDOW_WIDTH / 2 - m_playButton.getSize().x / 2, WINDOW_HEIGHT / 2});
+  m_playButton.setText("Play Great Music");
+
+  while (this->isOpen())
   {
-    sf::RenderWindow& window = getWindow();
-    window.create({1280, 720}, "Music Generator v0.0", sf::Style::Close | sf::Style::Titlebar);
-    window.setFramerateLimit(240);
-
-    sf::SoundBuffer soundBuffer = AudioGenerator::get({2, 220, 1}, AudioGenerator::square);
-    sf::Sound sound(soundBuffer);
-    sound.setVolume(40);
-    sound.play();
-
-    while (window.isOpen())
-    {
-      handleEvents();
-      update();
-      render();
-    }
+    this->handleEvents();
+    this->update();
+    this->render();
   }
 }

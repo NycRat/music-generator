@@ -157,13 +157,18 @@
   <ItemGroup>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="AudioGenerator.cpp" />
+    <ClCompile Include="Button.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="AudioGenerator.h" />
     <ClInclude Include="AudioSettings.h" />
+    <ClInclude Include="Button.h" />
     <ClInclude Include="Random.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="default_font.ttf" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

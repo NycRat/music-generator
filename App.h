@@ -1,9 +1,23 @@
 #pragma once
 
+#include <iostream>
+#include <vector>
 #include <SFML/Graphics.hpp>
 #include "AudioGenerator.h"
+#include "Button.h"
 
-namespace App
+class App: public sf::RenderWindow
 {
-  extern void start();
+public:
+  void start();
+private:
+  void render();
+  void update();
+  void handleEvents();
+  void handleButtonClicks(const sf::Vector2i& mousePos);
+private:
+  std::vector<sf::SoundBuffer> m_soundBuffers;
+  sf::SoundBuffer m_musicBuffer;
+  sf::Sound m_music;
+  Button m_playButton;
 };

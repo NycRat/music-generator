@@ -2,9 +2,65 @@
 
 namespace AudioGenerator
 {
+  sf::SoundBuffer generateMusic(const std::vector<sf::SoundBuffer>& sounds)
+  {
+    sf::SoundBuffer musicBuffer;
+    if (sounds.size() == 0)
+    {
+      return musicBuffer;
+    }
+
+    float bpm = (float) Random::get<int>(40, 120);
+    uint32_t duration = 20; // seconds
+    uint32_t sampleRate = AudioSettings::AUDIO_SAMPLE_RATE;
+    int16_t* buffer = new int16_t[duration * sampleRate];
+    sf::SoundBuffer soundBuffer;
+
+    int drumIndex = 0;
+    uint32_t drumDuration = (uint32_t) (sampleRate / (bpm / 60) / 4);
+    const sf::SoundBuffer& drum = sounds[Random::get<size_t>(0, sounds.size() - 1)];
+
+    std::vector<Note> melodyNotes;
+    melodyNotes.push_back(Note::B);
+    melodyNotes.push_back(Note::A);
+    melodyNotes.push_back(Note::G);
+
+    int melodyIndex = 0;
+    uint32_t melodyDuration = (uint32_t) (sampleRate / (bpm / 60) / 4);
+    const sf::SoundBuffer& melody = sounds[Random::get<size_t>(0, sounds.size() - 1)];
+
+    for (uint64_t i = 0; i < (uint64_t) duration * sampleRate; i++)
+    {
+      int64_t soundValue = 0;
+      // drum
+      if (i / drumDuration % 2 == 0)
+      {
+        soundValue += drum.getSamples()[drumIndex];
+        drumIndex++;
+        drumIndex = drumIndex % drum.getSampleCount();
+      }
+      else
+      {
+        drumIndex = 0;
+      }
+
+      // melody
+      soundValue += melody.getSamples()[melodyIndex];
+      melodyIndex++;
+      melodyIndex = melodyIndex % melody.getSampleCount();
+
+      // ??
+      buffer[i] = (int16_t) std::min(soundValue, (int64_t) INT16_MAX);
+    }
+
+    musicBuffer.loadFromSamples(buffer, (uint64_t) duration * sampleRate, 1, sampleRate);
+
+    return musicBuffer;
+  }
+
   sf::SoundBuffer get(const AudioInfo& info, int16_t(*func)(const AudioInfo&))
   {
-    const int64_t& sampleRate = AudioSettings::AUDIO_SAMPLE_RATE;
+    const uint32_t& sampleRate = AudioSettings::AUDIO_SAMPLE_RATE;
     const size_t& seconds = info.time;
 
     int16_t* samples = new int16_t[sampleRate * seconds];
@@ -22,7 +78,7 @@ namespace AudioGenerator
 
   int16_t sawtooth(const AudioInfo& info)
   {
-    int16_t ans = INT16_MIN * info.volume;
+    int16_t ans = (int16_t) (INT16_MIN * info.volume);
     ans += ((info.time * info.hertz) % (int16_t) (INT16_MAX * info.volume)) * 2;
     return ans;
   }
@@ -35,13 +91,13 @@ namespace AudioGenerator
 
   int16_t sine(const AudioInfo& info)
   {
-    int16_t volume = INT16_MAX * info.volume;
+    int16_t volume = (int16_t) (INT16_MAX * info.volume);
     int hertz = AudioSettings::AUDIO_SAMPLE_RATE / info.hertz;
-    return volume * std::sin(info.time / (hertz / (2 * std::numbers::pi)));
+    return (int16_t) (volume * std::sin(info.time / (hertz / (2 * std::numbers::pi))));
   }
 
   int16_t random(const AudioInfo& info)
   {
-    return Random::get();
+    return (int16_t) (Random::get<int16_t>(INT16_MIN, INT16_MAX) * info.volume);
   }
 }

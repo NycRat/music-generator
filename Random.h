@@ -1,15 +1,27 @@
 #pragma once
 
 #include <random>
+#include <type_traits>
 
 static std::random_device rd;
 static std::mt19937 mt(rd());
-static std::uniform_int_distribution<int16_t> dist(-10000, 10000);
 
 namespace Random
 {
-  static int16_t get()
+  template <typename T>
+  static T get(T low, T high)
   {
-    return dist(mt);
+    static_assert(std::is_arithmetic<T>::value, "Not an arithmetic type");
+
+    if (low <= high)
+    {
+      std::uniform_int_distribution<T> dist(low, high);
+      return dist(mt);
+    }
+    else
+    {
+      std::uniform_int_distribution<T> dist(high, low);
+      return dist(mt);
+    }
   }
 }
