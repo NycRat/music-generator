@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+#include <filesystem>
 #include <SFML/Graphics.hpp>
 #include "AudioGenerator.h"
 #include "Button.h"
@@ -20,4 +21,5 @@ private:
   sf::SoundBuffer m_musicBuffer;
   sf::Sound m_music;
   Button m_playButton;
+  Button m_saveButton;
 };

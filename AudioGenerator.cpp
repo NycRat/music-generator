@@ -50,10 +50,19 @@ namespace AudioGenerator
       melodyIndex = melodyIndex % melody.getSampleCount();
 
       // ??
-      buffer[i] = (int16_t) std::min(soundValue, (int64_t) INT16_MAX);
+      if (soundValue > INT16_MAX)
+      {
+        soundValue = INT16_MAX;
+      }
+      else if (soundValue < INT16_MIN)
+      {
+        soundValue = INT16_MIN;
+      }
+      buffer[i] = (int16_t) soundValue;
     }
 
     musicBuffer.loadFromSamples(buffer, (uint64_t) duration * sampleRate, 1, sampleRate);
+    delete[] buffer;
 
     return musicBuffer;
   }
@@ -85,8 +94,8 @@ namespace AudioGenerator
 
   int16_t square(const AudioInfo& info)
   {
-    int freq = AudioSettings::AUDIO_SAMPLE_RATE / 440;
-    return (info.time / freq) % 2 ? INT16_MAX : INT16_MIN;
+    int dis = AudioSettings::AUDIO_SAMPLE_RATE / info.hertz;
+    return (info.time / dis) % 2 ? INT16_MAX : INT16_MIN;
   }
 
   int16_t sine(const AudioInfo& info)
@@ -95,6 +104,13 @@ namespace AudioGenerator
     int hertz = AudioSettings::AUDIO_SAMPLE_RATE / info.hertz;
     return (int16_t) (volume * std::sin(info.time / (hertz / (2 * std::numbers::pi))));
   }
+
+  //int16_t triangle(const AudioInfo& info)
+  //{
+  //  int dis = AudioSettings::AUDIO_SAMPLE_RATE / info.hertz;
+  //  int thing = info.time % dis;
+  //  return (info.time / dis) % 2 ? INT16_MAX : INT16_MIN;
+  //}
 
   int16_t random(const AudioInfo& info)
   {

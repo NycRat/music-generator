@@ -24,6 +24,7 @@ namespace AudioGenerator
   extern int16_t sawtooth(const AudioInfo& info);
   extern int16_t random(const AudioInfo& info);
   extern int16_t sine(const AudioInfo& info);
+  //extern int16_t triangle(const AudioInfo& info);
 
   enum Note
   {
