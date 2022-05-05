@@ -105,12 +105,33 @@ namespace AudioGenerator
     return (int16_t) (volume * std::sin(info.time / (hertz / (2 * std::numbers::pi))));
   }
 
-  //int16_t triangle(const AudioInfo& info)
-  //{
-  //  int dis = AudioSettings::AUDIO_SAMPLE_RATE / info.hertz;
-  //  int thing = info.time % dis;
-  //  return (info.time / dis) % 2 ? INT16_MAX : INT16_MIN;
-  //}
+  int16_t triangle(const AudioInfo& info)
+  {
+    int waveDis = AudioSettings::AUDIO_SAMPLE_RATE / info.hertz;
+    uint64_t curDis = info.time % waveDis;
+
+    bool neg = false;
+    if (curDis > waveDis / 2)
+    {
+      neg = true;
+      curDis -= waveDis / 2; // just make it normal then apply neg after
+    }
+    float height = info.volume * INT16_MAX;
+    float width = waveDis / 4.f;
+    float scale = height / width; // scale so that maxwidth * scale = maxheight
+
+    int16_t ans;
+    if (curDis > waveDis / 4) // subtract if going down
+    {
+      curDis -= waveDis / 4;
+      ans = (int16_t) ((float) height - curDis * scale);
+    }
+    else
+    {
+      ans = (int16_t) (curDis * scale);
+    }
+    return ans * (neg ? -1 : 1);
+  }
 
   int16_t random(const AudioInfo& info)
   {
