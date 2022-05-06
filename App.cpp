@@ -86,11 +86,19 @@ void App::start()
   this->create({WINDOW_WIDTH, WINDOW_HEIGHT}, "Music Generator v0.0", sf::Style::Close | sf::Style::Titlebar);
   this->setVerticalSyncEnabled(true);
 
-  m_soundBuffers.push_back(AudioGenerator::get({2, AudioGenerator::A / 2, 0.8f}, AudioGenerator::triangle));
-  m_soundBuffers.push_back(AudioGenerator::get({2, AudioGenerator::C / 2, 0.8f}, AudioGenerator::triangle));
-  m_soundBuffers.push_back(AudioGenerator::get({2, AudioGenerator::E / 2, 0.2f}, AudioGenerator::triangle));
-  m_soundBuffers.push_back(AudioGenerator::get({2, AudioGenerator::A / 2, 0.2f}, AudioGenerator::triangle));
-  m_soundBuffers.push_back(AudioGenerator::get({2, AudioGenerator::D / 2, 0.2f}, AudioGenerator::triangle));
+  std::vector<int16_t(*)(const AudioGenerator::AudioInfo&)> waveforms;
+  waveforms.push_back(AudioGenerator::sine);
+  waveforms.push_back(AudioGenerator::triangle);
+  waveforms.push_back(AudioGenerator::square);
+  waveforms.push_back(AudioGenerator::sawtooth);
+
+  for (auto&& waveform : waveforms)
+  {
+    for (auto&& [noteName, frequency] : AudioGenerator::notes)
+    {
+      m_soundBuffers.push_back(AudioGenerator::getSound({1, frequency / 2, 0.6f}, waveform));
+    }
+  }
 
   m_playButton.setSize({BUTTON_WIDTH, BUTTON_HEIGHT});
   m_playButton.setPosition({WINDOW_WIDTH / 2 - m_playButton.getSize().x / 2, WINDOW_HEIGHT / 2 - BUTTON_HEIGHT * 1.2});
