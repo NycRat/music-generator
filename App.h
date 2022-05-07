@@ -17,9 +17,10 @@ private:
   void handleEvents();
   void handleButtonClicks(const sf::Vector2i& mousePos);
 private:
-  std::vector<sf::SoundBuffer> m_soundBuffers;
+  std::vector<AudioGenerator::Note> m_possibleNotes;
   sf::SoundBuffer m_musicBuffer;
   sf::Sound m_music;
   Button m_playButton;
   Button m_saveButton;
+  Button m_exitButton;
 };

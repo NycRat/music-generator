@@ -12,6 +12,12 @@
 
 namespace AudioGenerator
 {
+  struct Note
+  {
+    sf::SoundBuffer sound;
+    uint8_t key;
+  };
+
   struct AudioInfo
   {
     uint64_t time;
@@ -19,7 +25,7 @@ namespace AudioGenerator
     float volume;
   };
 
-  extern sf::SoundBuffer generateMusic(const std::vector<sf::SoundBuffer>& sounds);
+  extern sf::SoundBuffer generateMusic(const std::vector<Note>& notes);
   extern sf::SoundBuffer getSound(const AudioInfo&, int16_t(*func)(const AudioInfo&));
   extern int16_t square(const AudioInfo& info);
   extern int16_t sawtooth(const AudioInfo& info);
@@ -27,7 +33,7 @@ namespace AudioGenerator
   extern int16_t sine(const AudioInfo& info);
   extern int16_t triangle(const AudioInfo& info);
 
-  static std::unordered_map<int8_t, uint32_t> notes = {
+  static std::unordered_map<uint8_t, uint32_t> noteFrequencies = {
     {'A', 440},
     {'B', 494},
     {'C', 523},

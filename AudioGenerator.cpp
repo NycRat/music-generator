@@ -2,10 +2,18 @@
 
 namespace AudioGenerator
 {
-  sf::SoundBuffer generateMusic(const std::vector<sf::SoundBuffer>& sounds)
+  namespace
+  {
+    struct NoteInfo
+    {
+      const Note& note;
+      const uint32_t& duration;
+    };
+  };
+  sf::SoundBuffer generateMusic(const std::vector<Note>& notes)
   {
     sf::SoundBuffer musicBuffer;
-    if (sounds.size() == 0)
+    if (notes.size() == 0)
     {
       return musicBuffer;
     }
@@ -17,17 +25,19 @@ namespace AudioGenerator
     sf::SoundBuffer soundBuffer;
 
     int drumIndex = 0;
-    uint32_t drumDuration = static_cast<uint32_t>(sampleRate / (bpm / 60) / 4);
-    const sf::SoundBuffer& drum = sounds[Random::get<size_t>(0, sounds.size() - 1)];
 
-    //std::vector<Note> melodyNotes;
-    //melodyNotes.push_back(Note::B);
-    //melodyNotes.push_back(Note::A);
-    //melodyNotes.push_back(Note::G);
+    const Note& drum = notes[Random::get<size_t>(0, notes.size() - 1)];
+    uint32_t drumDuration = sampleRate / noteFrequencies.at(drum.key);
+    drumDuration = (static_cast<uint32_t>(round(sampleRate / (bpm / 60) / 4 / drumDuration))) * drumDuration;
+
+    std::vector<NoteInfo> melodyNotes;
+    for (int i = 0; i < 3; i++)
+    {
+      melodyNotes.push_back({notes[Random::get<size_t>(0, notes.size() - 1)], drumDuration});
+    }
 
     int melodyIndex = 0;
-    uint32_t melodyDuration = static_cast<uint32_t>(sampleRate / (bpm / 60) / 4);
-    const sf::SoundBuffer& melody = sounds[Random::get<size_t>(0, sounds.size() - 1)];
+    int melodyNoteIndex = 0;
 
     for (uint64_t i = 0; i < static_cast<uint64_t>(duration) * sampleRate; i++)
     {
@@ -35,9 +45,9 @@ namespace AudioGenerator
       // drum
       if (i / drumDuration % 2 == 0)
       {
-        soundValue += drum.getSamples()[drumIndex];
+        soundValue += drum.sound.getSamples()[drumIndex];
         drumIndex++;
-        drumIndex = drumIndex % drum.getSampleCount();
+        drumIndex = drumIndex % drum.sound.getSampleCount();
       }
       else
       {
@@ -45,11 +55,21 @@ namespace AudioGenerator
       }
 
       // melody
-      soundValue += melody.getSamples()[melodyIndex];
+      // make sure to add to not do this if melody is stopped for a bit
+      auto& curSound = melodyNotes[melodyNoteIndex].note.sound;
+      soundValue += curSound.getSamples()[melodyIndex % curSound.getSampleCount()];
       melodyIndex++;
-      melodyIndex = melodyIndex % melody.getSampleCount();
+      if (melodyIndex > melodyNotes[melodyNoteIndex].duration)
+      {
+        melodyIndex = 0;
+        melodyNoteIndex++;
+        if (melodyNoteIndex >= melodyNotes.size())
+        {
+          melodyNoteIndex = 0;
+        }
+      }
 
-      // ??
+      // stop integer overflow and underflow
       if (soundValue > INT16_MAX)
       {
         soundValue = INT16_MAX;
@@ -95,8 +115,8 @@ namespace AudioGenerator
 
   int16_t square(const AudioInfo& info)
   {
-    int dis = AudioSettings::AUDIO_SAMPLE_RATE / info.hertz;
-    return (info.time / dis) % 2 ? INT16_MAX : INT16_MIN;
+    int dis = AudioSettings::AUDIO_SAMPLE_RATE / info.hertz / 2;
+    return ((info.time % info.hertz) < dis ? INT16_MAX : INT16_MIN) * info.volume;
   }
 
   int16_t sine(const AudioInfo& info)
@@ -125,7 +145,7 @@ namespace AudioGenerator
     if (curDis > waveDis / 4) // subtract if going down
     {
       curDis -= waveDis / 4;
-      ans = static_cast<int16_t>((float) height - curDis * scale);
+      ans = static_cast<int16_t>(height - curDis * scale);
     }
     else
     {

@@ -19,10 +19,16 @@ bool isInside(const sf::Vector2i& mousePos, const Button& button)
 
 void App::handleButtonClicks(const sf::Vector2i& mousePos)
 {
+  if (isInside(mousePos, m_exitButton))
+  {
+    this->close();
+    return;
+  }
   if (isInside(mousePos, m_playButton))
   {
-    m_musicBuffer = AudioGenerator::generateMusic(m_soundBuffers);
+    m_musicBuffer = AudioGenerator::generateMusic(m_possibleNotes);
     m_music.setBuffer(m_musicBuffer);
+    m_music.setLoop(true);
     m_music.play();
   }
   if (isInside(mousePos, m_saveButton))
@@ -74,6 +80,7 @@ void App::render()
   this->clear();
   this->draw(m_playButton);
   this->draw(m_saveButton);
+  this->draw(m_exitButton);
   this->display();
 }
 
@@ -83,7 +90,7 @@ void App::update()
 
 void App::start()
 {
-  this->create({WINDOW_WIDTH, WINDOW_HEIGHT}, "Music Generator v0.0", sf::Style::Close | sf::Style::Titlebar);
+  this->create({WINDOW_WIDTH, WINDOW_HEIGHT}, "Music Generator v0.1", sf::Style::Close | sf::Style::Titlebar);
   this->setVerticalSyncEnabled(true);
 
   std::vector<int16_t(*)(const AudioGenerator::AudioInfo&)> waveforms;
@@ -94,9 +101,9 @@ void App::start()
 
   for (auto&& waveform : waveforms)
   {
-    for (auto&& [noteName, frequency] : AudioGenerator::notes)
+    for (auto&& [noteName, frequency] : AudioGenerator::noteFrequencies)
     {
-      m_soundBuffers.push_back(AudioGenerator::getSound({1, frequency / 2, 0.6f}, waveform));
+      m_possibleNotes.push_back({AudioGenerator::getSound({1, frequency / 2, 0.6f}, waveform), noteName});
     }
   }
 
@@ -107,6 +114,10 @@ void App::start()
   m_saveButton.setSize({BUTTON_WIDTH, BUTTON_HEIGHT});
   m_saveButton.setPosition({WINDOW_WIDTH / 2 - m_playButton.getSize().x / 2, WINDOW_HEIGHT / 2});
   m_saveButton.setText("Save Music");
+
+  m_exitButton.setSize({BUTTON_WIDTH, BUTTON_HEIGHT});
+  m_exitButton.setPosition({WINDOW_WIDTH / 2 - m_playButton.getSize().x / 2, WINDOW_HEIGHT / 2 + BUTTON_HEIGHT * 1.2});
+  m_exitButton.setText("Exit");
 
   while (this->isOpen())
   {
