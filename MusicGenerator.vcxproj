@@ -157,15 +157,22 @@
   <ItemGroup>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="AudioGenerator.cpp" />
+    <ClCompile Include="AudioPlayerUI.cpp" />
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="SettingsUI.cpp" />
+    <ClCompile Include="UI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
+    <ClInclude Include="AppInfo.h" />
     <ClInclude Include="AudioGenerator.h" />
+    <ClInclude Include="AudioPlayerUI.h" />
     <ClInclude Include="AudioSettings.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="Random.h" />
+    <ClInclude Include="SettingsUI.h" />
+    <ClInclude Include="UI.h" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="default_font.ttf" />

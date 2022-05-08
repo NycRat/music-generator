@@ -21,6 +21,18 @@ Button::Button()
   m_text.setFillColor(sf::Color::Black);
 }
 
+bool Button::inButton(const sf::Vector2i& mousePos) const
+{
+  const sf::Vector2f& buttonPos = this->getPosition();
+  const sf::Vector2f& buttonSize = this->getSize();
+  if (mousePos.x >= buttonPos.x && mousePos.y >= buttonPos.y &&
+    mousePos.x <= buttonPos.x + buttonSize.x && mousePos.y <= buttonPos.y + buttonSize.y)
+  {
+    return true;
+  }
+  return false;
+}
+
 void Button::setPosition(const sf::Vector2f& position)
 {
   m_rect.setPosition(position);

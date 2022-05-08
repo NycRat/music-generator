@@ -1,46 +1,24 @@
 #include "App.h"
 
-static const uint32_t WINDOW_HEIGHT = 720;
-static const uint32_t WINDOW_WIDTH = 1280;
-static const uint32_t BUTTON_HEIGHT = WINDOW_HEIGHT / 6;
-static const uint32_t BUTTON_WIDTH = WINDOW_WIDTH / 3;
-
-bool isInside(const sf::Vector2i& mousePos, const Button& button)
-{
-  const sf::Vector2f& buttonPos = button.getPosition();
-  const sf::Vector2f& buttonSize = button.getSize();
-  if (mousePos.x >= buttonPos.x && mousePos.y >= buttonPos.y &&
-    mousePos.x <= buttonPos.x + buttonSize.x && mousePos.y <= buttonPos.y + buttonSize.y)
-  {
-    return true;
-  }
-  return false;
-}
-
 void App::handleButtonClicks(const sf::Vector2i& mousePos)
 {
-  if (isInside(mousePos, m_exitButton))
+  m_settingsUI.handleMousePress(mousePos);
+  m_audioUI.handleMousePress(mousePos);
+  if (m_exitButton.inButton(mousePos))
   {
     this->close();
     return;
   }
-  if (isInside(mousePos, m_playButton))
+  if (m_saveButton.inButton(mousePos))
   {
-    m_musicBuffer = AudioGenerator::generateMusic(m_possibleNotes);
-    m_music.setBuffer(m_musicBuffer);
-    m_music.setLoop(true);
-    m_music.play();
-  }
-  if (isInside(mousePos, m_saveButton))
-  {
-    if (m_musicBuffer.getSampleCount() != 0)
+    if (m_info.musicBuffer.getSampleCount() != 0)
     {
       for (int16_t i = 0; i < INT16_MAX; i++)
       {
         if (!std::filesystem::exists("song" + std::to_string(i) + ".wav"))
         {
           std::cout << "Saved as: song" + std::to_string(i) + ".wav\n";
-          m_musicBuffer.saveToFile("song" + std::to_string(i) + ".wav");
+          m_info.musicBuffer.saveToFile("song" + std::to_string(i) + ".wav");
           break;
         }
         if (i == INT16_MAX - 1)
@@ -60,12 +38,14 @@ void App::handleEvents()
     if (event.type == sf::Event::Closed)
     {
       this->close();
+      return;
     }
     if (event.type == sf::Event::KeyPressed)
     {
       if (event.key.code == sf::Keyboard::Escape)
       {
         this->close();
+        return;
       }
     }
     if (event.type == sf::Event::MouseButtonPressed)
@@ -78,9 +58,10 @@ void App::handleEvents()
 void App::render()
 {
   this->clear();
-  this->draw(m_playButton);
+  this->draw(m_audioUI);
   this->draw(m_saveButton);
   this->draw(m_exitButton);
+  this->draw(m_settingsUI);
   this->display();
 }
 
@@ -90,7 +71,7 @@ void App::update()
 
 void App::start()
 {
-  this->create({WINDOW_WIDTH, WINDOW_HEIGHT}, "Music Generator v0.1", sf::Style::Close | sf::Style::Titlebar);
+  this->create({WINDOW_WIDTH, WINDOW_HEIGHT}, "Music Generator v0.2", sf::Style::Close | sf::Style::Titlebar);
   this->setVerticalSyncEnabled(true);
 
   std::vector<int16_t(*)(const AudioGenerator::AudioInfo&)> waveforms;
@@ -103,20 +84,19 @@ void App::start()
   {
     for (auto&& [noteName, frequency] : AudioGenerator::noteFrequencies)
     {
-      m_possibleNotes.push_back({AudioGenerator::getSound({1, frequency / 2, 0.6f}, waveform), noteName});
+      m_info.possibleNotes.push_back({AudioGenerator::getSound({1, frequency,
+        (waveform == AudioGenerator::sine) ? 0.6f : 0.2f}, waveform), noteName});
     }
   }
 
-  m_playButton.setSize({BUTTON_WIDTH, BUTTON_HEIGHT});
-  m_playButton.setPosition({WINDOW_WIDTH / 2 - m_playButton.getSize().x / 2, WINDOW_HEIGHT / 2 - BUTTON_HEIGHT * 1.2});
-  m_playButton.setText("Play Great Music");
-
   m_saveButton.setSize({BUTTON_WIDTH, BUTTON_HEIGHT});
-  m_saveButton.setPosition({WINDOW_WIDTH / 2 - m_playButton.getSize().x / 2, WINDOW_HEIGHT / 2});
+  m_saveButton.setPosition({BUTTON_WIDTH * 0.1f,
+    WINDOW_HEIGHT - BUTTON_HEIGHT - BUTTON_WIDTH * 0.1f});
   m_saveButton.setText("Save Music");
 
-  m_exitButton.setSize({BUTTON_WIDTH, BUTTON_HEIGHT});
-  m_exitButton.setPosition({WINDOW_WIDTH / 2 - m_playButton.getSize().x / 2, WINDOW_HEIGHT / 2 + BUTTON_HEIGHT * 1.2});
+  m_exitButton.setSize({BUTTON_WIDTH / 3, BUTTON_HEIGHT / 2});
+  m_exitButton.setPosition({WINDOW_WIDTH - m_exitButton.getSize().x * 1.2f,
+    WINDOW_HEIGHT - m_exitButton.getSize().y * 1.4f});
   m_exitButton.setText("Exit");
 
   while (this->isOpen())

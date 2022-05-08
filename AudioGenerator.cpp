@@ -9,8 +9,16 @@ namespace AudioGenerator
       const Note& note;
       const uint32_t& duration;
     };
+    uint32_t getFourthNoteDuration(const Note& note, const float& bpm)
+    {
+      auto& sampleRate = AudioSettings::AUDIO_SAMPLE_RATE;
+      uint32_t duration = sampleRate / noteFrequencies.at(note.key);
+      duration = (static_cast<uint32_t>(round(sampleRate / (bpm / 60) / 4 / duration))) * duration;
+      return duration;
+    }
   };
-  sf::SoundBuffer generateMusic(const std::vector<Note>& notes)
+
+  sf::SoundBuffer generateMusic(const std::vector<Note>& notes, const uint32_t& numMelodyNotes)
   {
     sf::SoundBuffer musicBuffer;
     if (notes.size() == 0)
@@ -20,24 +28,24 @@ namespace AudioGenerator
 
     float bpm = static_cast<float>(Random::get<uint32_t>(40, 120));
     uint32_t duration = 20; // seconds
-    uint32_t sampleRate = AudioSettings::AUDIO_SAMPLE_RATE;
+    const uint32_t& sampleRate = AudioSettings::AUDIO_SAMPLE_RATE;
     int16_t* buffer = new int16_t[duration * sampleRate];
     sf::SoundBuffer soundBuffer;
 
     int drumIndex = 0;
 
     const Note& drum = notes[Random::get<size_t>(0, notes.size() - 1)];
-    uint32_t drumDuration = sampleRate / noteFrequencies.at(drum.key);
-    drumDuration = (static_cast<uint32_t>(round(sampleRate / (bpm / 60) / 4 / drumDuration))) * drumDuration;
+    uint32_t drumDuration = getFourthNoteDuration(drum, bpm);
 
     std::vector<NoteInfo> melodyNotes;
-    for (int i = 0; i < 3; i++)
+    for (uint32_t i = 0; i < numMelodyNotes; i++)
     {
-      melodyNotes.push_back({notes[Random::get<size_t>(0, notes.size() - 1)], drumDuration});
+      const Note& tempNote = notes[Random::get<size_t>(0, notes.size() - 1)];
+      melodyNotes.push_back({tempNote, getFourthNoteDuration(tempNote, bpm)});
     }
 
-    int melodyIndex = 0;
-    int melodyNoteIndex = 0;
+    uint32_t melodyIndex = 0;
+    uint32_t melodyNoteIndex = 0;
 
     for (uint64_t i = 0; i < static_cast<uint64_t>(duration) * sampleRate; i++)
     {
@@ -108,15 +116,28 @@ namespace AudioGenerator
 
   int16_t sawtooth(const AudioInfo& info)
   {
-    int16_t ans = static_cast<int16_t>(INT16_MIN * info.volume);
-    ans += ((info.time * info.hertz) % static_cast<int16_t>(INT16_MAX * info.volume)) * 2;
-    return ans;
+    int waveDis = AudioSettings::AUDIO_SAMPLE_RATE / info.hertz;
+    uint64_t curDis = info.time % waveDis;
+
+    float height = info.volume * INT16_MAX;
+    float width = waveDis / 2.f;
+    float scale = height / width; // scale so that maxwidth * scale = maxheight
+
+    if (curDis > waveDis / 2) // subtract if going down
+    {
+      curDis -= waveDis / 2;
+      return static_cast<int16_t>(curDis * scale - height);
+    }
+    else
+    {
+      return static_cast<int16_t>(curDis * scale);
+    }
   }
 
   int16_t square(const AudioInfo& info)
   {
     int dis = AudioSettings::AUDIO_SAMPLE_RATE / info.hertz / 2;
-    return ((info.time % info.hertz) < dis ? INT16_MAX : INT16_MIN) * info.volume;
+    return static_cast<int16_t>(((info.time % info.hertz) < dis ? INT16_MAX : INT16_MIN) * info.volume);
   }
 
   int16_t sine(const AudioInfo& info)
