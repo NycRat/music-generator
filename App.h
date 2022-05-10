@@ -10,11 +10,7 @@
 #include "AppInfo.h"
 #include "SettingsUI.h"
 #include "AudioPlayerUI.h"
-
-static const uint32_t WINDOW_HEIGHT = 720;
-static const uint32_t WINDOW_WIDTH = 1280;
-static const uint32_t BUTTON_HEIGHT = WINDOW_HEIGHT / 8;
-static const uint32_t BUTTON_WIDTH = WINDOW_WIDTH / 5;
+#include "VisualAudio.h"
 
 class App: public sf::RenderWindow
 {
@@ -27,8 +23,8 @@ private:
   void handleButtonClicks(const sf::Vector2i& mousePos);
 private:
   AppInfo::Info m_info;
-  SettingsUI m_settingsUI{{WINDOW_WIDTH, WINDOW_HEIGHT}, m_info.numMelodyNotes};
-  AudioPlayerUI m_audioUI{{WINDOW_WIDTH, WINDOW_HEIGHT}, m_info};
-  Button m_saveButton;
+
+  SettingsUI m_settingsUI{m_info};
+  AudioPlayerUI m_audioUI{m_info};
   Button m_exitButton;
 };

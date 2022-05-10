@@ -1,23 +1,8 @@
 #include "Button.h"
-#include <iostream>
-
-namespace Font
-{
-  static sf::Font& get()
-  {
-    static sf::Font* font = new sf::Font();
-    return *font;
-  }
-}
 
 Button::Button()
 {
-  sf::Font& font = Font::get();
-  if (font.getInfo().family == "")
-  {
-    font.loadFromFile("default_font.ttf");
-  }
-  m_text.setFont(font);
+  m_text.setFont(Font::get());
   m_text.setFillColor(sf::Color::Black);
 }
 

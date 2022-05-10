@@ -9,25 +9,6 @@ void App::handleButtonClicks(const sf::Vector2i& mousePos)
     this->close();
     return;
   }
-  if (m_saveButton.inButton(mousePos))
-  {
-    if (m_info.musicBuffer.getSampleCount() != 0)
-    {
-      for (int16_t i = 0; i < INT16_MAX; i++)
-      {
-        if (!std::filesystem::exists("song" + std::to_string(i) + ".wav"))
-        {
-          std::cout << "Saved as: song" + std::to_string(i) + ".wav\n";
-          m_info.musicBuffer.saveToFile("song" + std::to_string(i) + ".wav");
-          break;
-        }
-        if (i == INT16_MAX - 1)
-        {
-          std::cout << "Cannot save song\n";
-        }
-      }
-    }
-  }
 }
 
 void App::handleEvents()
@@ -58,8 +39,8 @@ void App::handleEvents()
 void App::render()
 {
   this->clear();
+  this->draw(m_info.visualWaveform, m_info.waveformTransform);
   this->draw(m_audioUI);
-  this->draw(m_saveButton);
   this->draw(m_exitButton);
   this->draw(m_settingsUI);
   this->display();
@@ -67,10 +48,19 @@ void App::render()
 
 void App::update()
 {
+  if (m_info.visualWaveform.getVertexCount() &&
+    m_info.music.getStatus() == sf::Sound::Playing)
+  {
+    sf::Transform t;
+    t.translate(-m_info.music.getPlayingOffset().asSeconds() * AudioSettings::AUDIO_SAMPLE_RATE
+      , 0);
+    m_info.waveformTransform = t;
+  }
 }
 
 void App::start()
 {
+  using namespace AppInfo;
   this->create({WINDOW_WIDTH, WINDOW_HEIGHT}, "Music Generator v0.2", sf::Style::Close | sf::Style::Titlebar);
   this->setVerticalSyncEnabled(true);
 
@@ -89,12 +79,7 @@ void App::start()
     }
   }
 
-  m_saveButton.setSize({BUTTON_WIDTH, BUTTON_HEIGHT});
-  m_saveButton.setPosition({BUTTON_WIDTH * 0.1f,
-    WINDOW_HEIGHT - BUTTON_HEIGHT - BUTTON_WIDTH * 0.1f});
-  m_saveButton.setText("Save Music");
-
-  m_exitButton.setSize({BUTTON_WIDTH / 3, BUTTON_HEIGHT / 2});
+  m_exitButton.setSize({BUTTON_WIDTH / 2, BUTTON_HEIGHT});
   m_exitButton.setPosition({WINDOW_WIDTH - m_exitButton.getSize().x * 1.2f,
     WINDOW_HEIGHT - m_exitButton.getSize().y * 1.4f});
   m_exitButton.setText("Exit");

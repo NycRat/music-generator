@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include "UI.h"
 
 class Button: public sf::Drawable
 {

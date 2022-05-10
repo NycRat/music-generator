@@ -2,6 +2,19 @@
 
 #include <SFML/Graphics.hpp>
 
+namespace Font
+{
+  static sf::Font& get()
+  {
+    static sf::Font* font = new sf::Font();
+    if (font->getInfo().family == "")
+    {
+      font->loadFromFile("default_font.ttf");
+    }
+    return *font;
+  }
+}
+
 class UI: public sf::Drawable
 {
 public:

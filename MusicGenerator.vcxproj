@@ -161,7 +161,7 @@
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SettingsUI.cpp" />
-    <ClCompile Include="UI.cpp" />
+    <ClCompile Include="VisualAudio.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -173,6 +173,7 @@
     <ClInclude Include="Random.h" />
     <ClInclude Include="SettingsUI.h" />
     <ClInclude Include="UI.h" />
+    <ClInclude Include="VisualAudio.h" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="default_font.ttf" />
