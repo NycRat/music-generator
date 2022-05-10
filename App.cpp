@@ -7,7 +7,6 @@ void App::handleButtonClicks(const sf::Vector2i& mousePos)
   if (m_exitButton.inButton(mousePos))
   {
     this->close();
-    return;
   }
 }
 
@@ -20,14 +19,6 @@ void App::handleEvents()
     {
       this->close();
       return;
-    }
-    if (event.type == sf::Event::KeyPressed)
-    {
-      if (event.key.code == sf::Keyboard::Escape)
-      {
-        this->close();
-        return;
-      }
     }
     if (event.type == sf::Event::MouseButtonPressed)
     {
@@ -51,10 +42,9 @@ void App::update()
   if (m_info.visualWaveform.getVertexCount() &&
     m_info.music.getStatus() == sf::Sound::Playing)
   {
-    sf::Transform t;
-    t.translate(-m_info.music.getPlayingOffset().asSeconds() * AudioSettings::AUDIO_SAMPLE_RATE
-      , 0);
-    m_info.waveformTransform = t;
+    float newOffset = (-m_info.music.getPlayingOffset().asSeconds() + 0.2f) * AudioSettings::AUDIO_SAMPLE_RATE;
+    m_info.waveformTransform.translate(newOffset - m_curWaveformOffset, 0);
+    m_curWaveformOffset = newOffset;
   }
 }
 

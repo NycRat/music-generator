@@ -17,8 +17,9 @@ namespace AppInfo
     std::vector<AudioGenerator::Note> possibleNotes;
     sf::SoundBuffer musicBuffer;
     sf::Sound music;
-    uint32_t numMelodyNotes = 3;
     sf::VertexArray visualWaveform;
     sf::Transform waveformTransform;
+    uint32_t numMelodyNotes = 3;
+    uint32_t bpm = 60;
   };
 }

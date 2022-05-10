@@ -9,16 +9,17 @@ namespace AudioGenerator
       const Note& note;
       const uint32_t& duration;
     };
-    uint32_t getFourthNoteDuration(const Note& note, const float& bpm)
+    uint32_t getFourthNoteDuration(const Note& note, const uint32_t& bpm)
     {
       auto& sampleRate = AudioSettings::AUDIO_SAMPLE_RATE;
       uint32_t duration = sampleRate / noteFrequencies.at(note.key);
-      duration = (static_cast<uint32_t>(round(sampleRate / (bpm / 60) / 4 / duration))) * duration;
+      duration = (static_cast<uint32_t>(round(sampleRate / (bpm / 60.f) / 4 / duration))) * duration;
       return duration;
     }
   };
 
-  sf::SoundBuffer generateMusic(const std::vector<Note>& notes, const uint32_t& numMelodyNotes)
+  sf::SoundBuffer generateMusic(
+    const std::vector<Note>& notes, const uint32_t& numMelodyNotes, const uint32_t& bpm)
   {
     sf::SoundBuffer musicBuffer;
     if (notes.size() == 0)
@@ -26,7 +27,6 @@ namespace AudioGenerator
       return musicBuffer;
     }
 
-    float bpm = static_cast<float>(Random::get<uint32_t>(40, 120));
     uint32_t duration = 20; // seconds
     const uint32_t& sampleRate = AudioSettings::AUDIO_SAMPLE_RATE;
     int16_t* buffer = new int16_t[duration * sampleRate];

@@ -25,7 +25,8 @@ namespace AudioGenerator
     float volume;
   };
 
-  extern sf::SoundBuffer generateMusic(const std::vector<Note>& notes, const uint32_t& numMelodyNotes);
+  extern sf::SoundBuffer generateMusic(
+    const std::vector<Note>& notes, const uint32_t& numMelodyNotes, const uint32_t& bpm);
   extern sf::SoundBuffer getSound(const AudioInfo&, int16_t(*func)(const AudioInfo&));
   extern int16_t square(const AudioInfo& info);
   extern int16_t sawtooth(const AudioInfo& info);

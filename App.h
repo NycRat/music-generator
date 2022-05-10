@@ -23,6 +23,7 @@ private:
   void handleButtonClicks(const sf::Vector2i& mousePos);
 private:
   AppInfo::Info m_info;
+  float m_curWaveformOffset = 0;
 
   SettingsUI m_settingsUI{m_info};
   AudioPlayerUI m_audioUI{m_info};

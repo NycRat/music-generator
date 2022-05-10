@@ -19,8 +19,29 @@ SettingsUI::SettingsUI(AppInfo::Info& info):
 
   m_numMelodyNotesText.setFont(Font::get());
   m_numMelodyNotesText.setFillColor(sf::Color::White);
-  m_numMelodyNotesText.setPosition({WINDOW_WIDTH / 2.f, WINDOW_HEIGHT / 10.f});
   m_numMelodyNotesText.setString("# of Melody Notes: " + std::to_string(m_info.numMelodyNotes));
+  m_numMelodyNotesText.setPosition(
+    {WINDOW_WIDTH - m_numMelodyNotesText.getGlobalBounds().width - buttonSize.x * 1.5f,
+    buttonSize.y * 1.2f});
+
+  m_increaseBpm.setSize({buttonSize.x, buttonSize.y});
+  m_increaseBpm.setPosition({
+    WINDOW_WIDTH - buttonSize.x * 1.2f,
+    buttonSize.y * 2.8f});
+  m_increaseBpm.setText("+");
+
+  m_decreaseBpm.setSize({buttonSize.x, buttonSize.y});
+  m_decreaseBpm.setPosition({
+    WINDOW_WIDTH - buttonSize.x * 1.2f,
+    buttonSize.y * 4.f});
+  m_decreaseBpm.setText("-");
+
+  m_bpmText.setFont(Font::get());
+  m_bpmText.setFillColor(sf::Color::White);
+  m_bpmText.setString("BPM: " + std::to_string(m_info.bpm));
+  m_bpmText.setPosition(
+    {WINDOW_WIDTH - m_bpmText.getGlobalBounds().width - buttonSize.x * 1.5f,
+    buttonSize.y * 3.8f});
 }
 
 void SettingsUI::handleMousePress(const sf::Vector2i& mousePos)
@@ -40,6 +61,23 @@ void SettingsUI::handleMousePress(const sf::Vector2i& mousePos)
     }
   }
   m_numMelodyNotesText.setString("# of Melody Notes: " + std::to_string(m_info.numMelodyNotes));
+
+  if (m_increaseBpm.inButton(mousePos))
+  {
+    if (m_info.bpm < 1000)
+    {
+      m_info.bpm += 10;
+    }
+  }
+  if (m_decreaseBpm.inButton(mousePos))
+  {
+    if (m_info.bpm > 10)
+    {
+      m_info.bpm -= 10;
+    }
+  }
+
+  m_bpmText.setString("BPM: " + std::to_string(m_info.bpm));
 }
 
 void SettingsUI::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -47,4 +85,7 @@ void SettingsUI::draw(sf::RenderTarget& target, sf::RenderStates states) const
   target.draw(m_increaseMelodyNotes, states);
   target.draw(m_decreaseMelodyNotes, states);
   target.draw(m_numMelodyNotesText, states);
+  target.draw(m_increaseBpm, states);
+  target.draw(m_decreaseBpm, states);
+  target.draw(m_bpmText, states);
 }
