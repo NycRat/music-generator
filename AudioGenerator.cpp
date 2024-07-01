@@ -1,4 +1,5 @@
 #include "AudioGenerator.h"
+#include <cmath>
 
 namespace AudioGenerator
 {
@@ -144,7 +145,7 @@ namespace AudioGenerator
   {
     int16_t volume = static_cast<int16_t>(INT16_MAX * info.volume);
     int hertz = AudioSettings::AUDIO_SAMPLE_RATE / info.hertz;
-    return static_cast<int16_t>(volume * std::sin(info.time / (hertz / (2 * std::numbers::pi))));
+    return static_cast<int16_t>(volume * std::sin(info.time / (hertz / (2 * M_PI))));
   }
 
   int16_t triangle(const AudioInfo& info)

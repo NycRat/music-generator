@@ -9,3 +9,9 @@ x86/
 *.obj
 *.user
 
+.DS_Store
+.cache
+build
+
+compile_commands.json
+*.wav
